@@ -1,0 +1,9 @@
+{
+  "name": "replay-perf-puppet",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "puppeteer": "^19.8.3"
+  }
+}

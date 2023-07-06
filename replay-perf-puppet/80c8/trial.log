@@ -1,0 +1,15 @@
+running simulation
+starting simulation with id: 80c8
+{
+  args: { data: { type: 'click' } },
+  cat: 'devtools.timeline',
+  dur: 11136,
+  name: 'EventDispatch',
+  ph: 'X',
+  pid: 54748,
+  tdur: 10663,
+  tid: 259,
+  ts: 1430986836883,
+  tts: 273462
+}
+click event duration: 11136

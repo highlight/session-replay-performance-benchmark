@@ -1,0 +1,212 @@
+starting simulation with id: 526f
+running with params:  recording=on listSize=1 t0
+running with params:  recording=on listSize=1 t1
+running with params:  recording=on listSize=1 t2
+running with params:  recording=on listSize=1 t3
+running with params:  recording=on listSize=1 t4
+running with params:  recording=on listSize=1 t5
+running with params:  recording=on listSize=1 t6
+running with params:  recording=on listSize=1 t7
+running with params:  recording=on listSize=1 t8
+running with params:  recording=on listSize=1 t9
+times: [
+  13971, 12576, 12578,
+  16003, 11086, 13305,
+  10616, 10950, 12130,
+  14963
+]
+avg: 12817.8
+running with params:  recording=off listSize=1 t0
+running with params:  recording=off listSize=1 t1
+running with params:  recording=off listSize=1 t2
+running with params:  recording=off listSize=1 t3
+running with params:  recording=off listSize=1 t4
+running with params:  recording=off listSize=1 t5
+running with params:  recording=off listSize=1 t6
+running with params:  recording=off listSize=1 t7
+running with params:  recording=off listSize=1 t8
+running with params:  recording=off listSize=1 t9
+times: [
+  11198, 12674, 12252,
+  11025, 13115,  8765,
+  14040, 11473, 11728,
+   8386
+]
+avg: 11465.6
+running with params:  recording=on listSize=10 t0
+running with params:  recording=on listSize=10 t1
+running with params:  recording=on listSize=10 t2
+running with params:  recording=on listSize=10 t3
+running with params:  recording=on listSize=10 t4
+running with params:  recording=on listSize=10 t5
+running with params:  recording=on listSize=10 t6
+running with params:  recording=on listSize=10 t7
+running with params:  recording=on listSize=10 t8
+running with params:  recording=on listSize=10 t9
+times: [
+  20242, 19115, 14258,
+  14607, 12097, 13750,
+  20814, 18246, 18998,
+  20167
+]
+avg: 17229.4
+running with params:  recording=off listSize=10 t0
+running with params:  recording=off listSize=10 t1
+running with params:  recording=off listSize=10 t2
+running with params:  recording=off listSize=10 t3
+running with params:  recording=off listSize=10 t4
+running with params:  recording=off listSize=10 t5
+running with params:  recording=off listSize=10 t6
+running with params:  recording=off listSize=10 t7
+running with params:  recording=off listSize=10 t8
+running with params:  recording=off listSize=10 t9
+times: [
+  17653, 14770, 15419,
+  15196, 16191, 15677,
+  17047, 14761, 14410,
+  13342
+]
+avg: 15446.6
+running with params:  recording=on listSize=100 t0
+running with params:  recording=on listSize=100 t1
+running with params:  recording=on listSize=100 t2
+running with params:  recording=on listSize=100 t3
+running with params:  recording=on listSize=100 t4
+running with params:  recording=on listSize=100 t5
+running with params:  recording=on listSize=100 t6
+running with params:  recording=on listSize=100 t7
+running with params:  recording=on listSize=100 t8
+running with params:  recording=on listSize=100 t9
+times: [
+  22614, 21952, 29427,
+  22599, 33575, 26134,
+  22059, 26615, 33144,
+  23715
+]
+avg: 26183.4
+running with params:  recording=off listSize=100 t0
+running with params:  recording=off listSize=100 t1
+running with params:  recording=off listSize=100 t2
+running with params:  recording=off listSize=100 t3
+running with params:  recording=off listSize=100 t4
+running with params:  recording=off listSize=100 t5
+running with params:  recording=off listSize=100 t6
+running with params:  recording=off listSize=100 t7
+running with params:  recording=off listSize=100 t8
+running with params:  recording=off listSize=100 t9
+times: [
+  25477, 22787, 23692,
+  24788, 22998, 27889,
+  24847, 22340, 18666,
+  27288
+]
+avg: 24077.2
+running with params:  recording=on listSize=1000 t0
+running with params:  recording=on listSize=1000 t1
+running with params:  recording=on listSize=1000 t2
+running with params:  recording=on listSize=1000 t3
+running with params:  recording=on listSize=1000 t4
+running with params:  recording=on listSize=1000 t5
+running with params:  recording=on listSize=1000 t6
+running with params:  recording=on listSize=1000 t7
+running with params:  recording=on listSize=1000 t8
+running with params:  recording=on listSize=1000 t9
+times: [
+  132122, 107504,
+   99841, 101251,
+   92013, 106187,
+  109302, 103656,
+  123137, 105262
+]
+avg: 108027.5
+running with params:  recording=off listSize=1000 t0
+running with params:  recording=off listSize=1000 t1
+running with params:  recording=off listSize=1000 t2
+running with params:  recording=off listSize=1000 t3
+running with params:  recording=off listSize=1000 t4
+running with params:  recording=off listSize=1000 t5
+running with params:  recording=off listSize=1000 t6
+running with params:  recording=off listSize=1000 t7
+running with params:  recording=off listSize=1000 t8
+running with params:  recording=off listSize=1000 t9
+times: [
+  107314, 104529,
+  112338, 117958,
+  102444, 105052,
+  112855, 124654,
+  109939,  91894
+]
+avg: 108897.7
+running with params:  recording=on listSize=10000 t0
+running with params:  recording=on listSize=10000 t1
+running with params:  recording=on listSize=10000 t2
+running with params:  recording=on listSize=10000 t3
+running with params:  recording=on listSize=10000 t4
+running with params:  recording=on listSize=10000 t5
+running with params:  recording=on listSize=10000 t6
+running with params:  recording=on listSize=10000 t7
+running with params:  recording=on listSize=10000 t8
+running with params:  recording=on listSize=10000 t9
+times: [
+  432611, 419092,
+  409458, 489231,
+  463636, 469980,
+  522812, 462506,
+  462945, 432032
+]
+avg: 456430.3
+running with params:  recording=off listSize=10000 t0
+running with params:  recording=off listSize=10000 t1
+running with params:  recording=off listSize=10000 t2
+running with params:  recording=off listSize=10000 t3
+running with params:  recording=off listSize=10000 t4
+running with params:  recording=off listSize=10000 t5
+running with params:  recording=off listSize=10000 t6
+running with params:  recording=off listSize=10000 t7
+running with params:  recording=off listSize=10000 t8
+running with params:  recording=off listSize=10000 t9
+times: [
+  456994, 419308,
+  468092, 399838,
+  458590, 392878,
+  439751, 378620,
+  399961, 515074
+]
+avg: 432910.6
+running with params:  recording=on listSize=100000 t0
+running with params:  recording=on listSize=100000 t1
+running with params:  recording=on listSize=100000 t2
+running with params:  recording=on listSize=100000 t3
+running with params:  recording=on listSize=100000 t4
+running with params:  recording=on listSize=100000 t5
+running with params:  recording=on listSize=100000 t6
+running with params:  recording=on listSize=100000 t7
+running with params:  recording=on listSize=100000 t8
+running with params:  recording=on listSize=100000 t9
+times: [
+  2538942, 2690281,
+  2859908, 2608420,
+  2710680, 2622080,
+  2684081, 2660227,
+  2646163, 2596801
+]
+avg: 2661758.3
+running with params:  recording=off listSize=100000 t0
+running with params:  recording=off listSize=100000 t1
+running with params:  recording=off listSize=100000 t2
+running with params:  recording=off listSize=100000 t3
+running with params:  recording=off listSize=100000 t4
+running with params:  recording=off listSize=100000 t5
+running with params:  recording=off listSize=100000 t6
+running with params:  recording=off listSize=100000 t7
+running with params:  recording=off listSize=100000 t8
+running with params:  recording=off listSize=100000 t9
+times: [
+  2627658, 2674327,
+  2650118, 2715916,
+  2669218, 2615852,
+  2641148, 2637114,
+  2654325, 2655167
+]
+avg: 2654084.3
+running with params:  recording=on listSize=1000000 t0

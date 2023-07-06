@@ -1,0 +1,17 @@
+starting simulation with id: e543
+running with path:  e543/recording=on&listSize=1.json
+click event duration: 8143
+running with path:  e543/recording=off&listSize=1.json
+click event duration: 11952
+running with path:  e543/recording=on&listSize=10.json
+click event duration: 14563
+running with path:  e543/recording=off&listSize=10.json
+click event duration: 14118
+running with path:  e543/recording=on&listSize=100.json
+click event duration: 19882
+running with path:  e543/recording=off&listSize=100.json
+click event duration: 23725
+running with path:  e543/recording=on&listSize=1000.json
+click event duration: 95885
+running with path:  e543/recording=off&listSize=1000.json
+click event duration: 100165
