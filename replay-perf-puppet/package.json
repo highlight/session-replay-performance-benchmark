@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "start": "yarn exec node index.js"
+  },
   "dependencies": {
     "puppeteer": "^19.8.3"
   }

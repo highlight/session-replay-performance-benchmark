@@ -1,0 +1,14 @@
+{
+  "name": "session-replay-performance-benchmark",
+  "packageManager": "yarn@3.6.1",
+  "workspaces": [
+    "replay-perf-app",
+    "replay-perf-puppet"
+  ],
+  "scripts": {
+    "start": "concurrently --kill-others 'yarn workspace replay-perf-app run start' 'yarn workspace replay-perf-puppet run start'"
+  },
+  "dependencies": {
+    "concurrently": "^8.2.0"
+  }
+}
