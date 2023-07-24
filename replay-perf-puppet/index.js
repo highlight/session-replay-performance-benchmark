@@ -28,7 +28,6 @@ async function traceRecord(traceFilePath, url) {
   const browser = await puppeteer.launch({ headless: 'new' });
   const page = await browser.newPage();
   await page.goto(url);
-  await delay(1000);
   const folderName = traceFilePath.split("/")[0];
   if (!fs.existsSync(folderName)) {
     fs.mkdirSync(folderName);
@@ -36,7 +35,6 @@ async function traceRecord(traceFilePath, url) {
   await page.tracing.start({ path: traceFilePath, screenshots: true });
   await page.click("#list-button");
   await page.tracing.stop();
-  await delay(1000);
   await browser.close();
   // read in the file from traceFilePath and parse as json
   const traceFile = fs.readFileSync(traceFilePath);
@@ -54,16 +52,16 @@ async function traceRecord(traceFilePath, url) {
 }
 
 const buildUrlParams = (recording, listSize, testNum) =>
-  `${trialId}/t${testNum}-recording=${recording}&listSize=${listSize}`;
+  `${trialId}/t${testNum}&replay=${recording}&listSize=${listSize}`;
 
 (async () => {
   console.log("starting simulation with id:", trialId);
-  for (let i = 1; i < 10 * 10 ** 6; i *= 10) {
+  for (let i = 1; i < 10 ** 6; i *= 10) {
     const runTests = async (recording) => {
       const times = [];
       for (let x = 0; x < 10; x++) {
-        console.log("running with params: ", `recording=${recording}`, `listSize=${i}`, `t${x}`);
         const onParams = buildUrlParams(`${recording}`, i, x);
+        console.log("running with params: ", `recording=${recording}`, `listSize=${i}`, `t${x}`, onParams);
         const onDur = await traceRecord(
           `${onParams}.json`,
           `http://localhost:3000?${onParams}`
