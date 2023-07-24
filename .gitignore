@@ -11,5 +11,6 @@
 .pnp.*
 
 node_modules
-replay-perf-puppet/results
+replay-perf-puppet/results/*
+!replay-perf-puppet/results/.gitkeep
 

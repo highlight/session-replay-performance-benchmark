@@ -6,9 +6,10 @@
     "replay-perf-puppet"
   ],
   "scripts": {
-    "start": "concurrently --kill-others 'yarn workspace replay-perf-app run start' 'yarn workspace replay-perf-puppet run start'"
+    "start": "yarn workspace replay-perf-app run build && concurrently --kill-others 'yarn workspace replay-perf-app run preview' 'yarn workspace replay-perf-puppet run start'"
   },
   "dependencies": {
-    "concurrently": "^8.2.0"
+    "concurrently": "^8.2.0",
+    "rrweb": "^2.0.0-alpha.4"
   }
 }
