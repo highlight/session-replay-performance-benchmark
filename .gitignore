@@ -11,4 +11,5 @@
 .pnp.*
 
 node_modules
+replay-perf-puppet/results
 

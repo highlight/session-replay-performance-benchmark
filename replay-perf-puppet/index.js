@@ -3,7 +3,7 @@ const crypto = require("crypto");
 const fs = require("fs");
 var util = require("util");
 
-const trialId = crypto.randomUUID().slice(0, 4);
+const trialId = 'results/' + crypto.randomUUID().slice(0, 4);
 log_file = fs.createWriteStream(trialId + "/trial.log", {
   flags: "w",
 });
@@ -25,7 +25,7 @@ function delay(time) {
 }
 
 async function traceRecord(traceFilePath, url) {
-  const browser = await puppeteer.launch({ headless: true });
+  const browser = await puppeteer.launch({ headless: 'new' });
   const page = await browser.newPage();
   await page.goto(url);
   await delay(1000);
