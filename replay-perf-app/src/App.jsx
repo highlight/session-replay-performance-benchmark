@@ -23,6 +23,7 @@ function App() {
   const params = new URLSearchParams(window.location.search);
   const replayParam = params.get("replay");
   const listSizeParam = params.get("listSize");
+  const increment = parseInt(params.get("increment")) || INCREMENT;
   const listSizeNum = parseInt(listSizeParam, 10) || 0;
 
   useEffect(() => {
@@ -46,6 +47,12 @@ function App() {
     setItems([...Array(listSizeNum).keys()].map((i) => i.toString()));
   }, [listSizeNum, setItems])
 
+  function addItems(num) { 
+    setItems((items) => [...items, ...[...Array(num).keys()].map((i) => i.toString())]);
+    console.log(items.length)
+    setClicked(true);
+  }
+
   return (
     <div
       style={{
@@ -63,6 +70,12 @@ function App() {
       <p style={{color: "white"}}>
         List Size: {listSizeNum}
       </p>
+      <p id="item-count" style={{color: "white"}}>
+        Item Count: {items.length}
+      </p>
+      <button id="add-elements" style={{ width: 100 }} onClick={() => addItems(increment)}>
+        {"Add 100"}
+      </button>
       <button id="list-button" style={{ width: 100 }} onClick={() => setClicked((t) => !t)}>
         {"List"}
       </button>
