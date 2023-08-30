@@ -4,6 +4,19 @@ const fs = require("fs");
 var util = require("util");
 const { setInterval } = require("timers");
 
+function addToCSV(filename, values) {
+  // Convert the values array to a CSV string
+  const csvRow = values.join(',') + '\n';
+  // Check if the file exists
+  const fileExists = fs.existsSync(filename);
+  if (!fileExists) {
+    // If the file doesn't exist, create it and add a header if needed
+    console.log('Creating new file')
+    fs.writeFileSync(filename, 'ts,tts,heapSizeUsed\n', 'utf8');
+  }
+  // Append the CSV row to the file
+  fs.appendFileSync(filename, csvRow, 'utf8');
+}
 const trialId = "results/" + crypto.randomUUID().slice(0, 4);
 log_file = fs.createWriteStream(trialId + "/trial.log", {
   flags: "w",
@@ -25,8 +38,8 @@ function delay(time) {
   });
 }
 
-async function traceRecord(traceFilePath, url) {
-  const browser = await puppeteer.launch({ headless: "new" });
+async function traceRecord(traceFilePath, heapCSVpath,url) {
+  const browser = await puppeteer.launch({ headless: "new", devtools: true});
   const page = await browser.newPage();
   await page.goto(url);
   const folderName = traceFilePath.split("/")[0];
@@ -34,8 +47,9 @@ async function traceRecord(traceFilePath, url) {
     fs.mkdirSync(folderName);
   }
   await page.tracing.start({ path: traceFilePath, screenshots: true });
-  for (let i = 0; i < 25; i++) {
-    await delay(1000);
+  for (let i = 0; i < 20; i++) {
+    await delay(100);
+    console.log(i)
     await page.click("#add-elements");
   }
 
@@ -53,6 +67,15 @@ async function traceRecord(traceFilePath, url) {
   const clickEvents = trace.traceEvents.filter(
     (event) => event?.args?.data?.type === "click"
   );
+
+  const heapUsed = trace.traceEvents.filter(
+    (event) => event?.args?.data?.jsHeapSizeUsed
+  );
+
+  heapUsed.forEach((event) => {
+    addToCSV(heapCSVpath, [event.ts, event.tts, event.args.data.jsHeapSizeUsed])
+  });
+
   // if (clickEvents.length === 0) {
   //   throw ("no click events found in trace file:", traceFilePath);
   // } else if (clickEvents.length > 1) {
@@ -74,9 +97,8 @@ const buildUrlParams = (recording, listSize, testNum, increment) =>
   `${trialId}/t${testNum}&replay=${recording}&listSize=${listSize}&increment=${increment}`;
 
 (async () => {
-  const increment = 1000;
+  const increment = 100;
   console.log("starting simulation with id:", trialId);
-  // for (let i = 1; i < 10 ** 6; i *= 10) {
   for (let i = 0; i < 1; i++) {
     const runTests = async (recording) => {
       const times = [];
@@ -91,7 +113,8 @@ const buildUrlParams = (recording, listSize, testNum, increment) =>
         );
         const onDur = await traceRecord(
           `${onParams}.json`,
-          `http://localhost:3000?${onParams}`
+          `${onParams}HEAP.csv`,
+          `http://localhost:3000?${onParams}`,
         );
         console.log(`http://localhost:3000?${onParams}`);
         times.push(onDur);
