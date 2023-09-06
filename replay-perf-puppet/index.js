@@ -4,6 +4,64 @@ const fs = require("fs");
 var util = require("util");
 const { setInterval } = require("timers");
 
+// Function to process metrics and extract timestamp and activeTime
+function processMetrics(metrics) {
+  const activeTime = metrics.metrics
+    .filter(m => m.name.includes("Duration"))
+    .map(m => m.value)
+    .reduce((a, b) => a + b);
+
+  return {
+    timestamp: metrics.metrics.find(m => m.name === "Timestamp")?.value || 0,
+    activeTime,
+  };
+}
+
+// Function to log CPU usage metrics at specified intervals
+async function logMetrics(cdp, interval) {
+  // Enable performance monitoring
+  await cdp.send("Performance.enable", {
+    timeDomain: "timeTicks",
+  });
+
+  // Get initial metrics
+  const { timestamp: startTime, activeTime: initialActiveTime } = processMetrics(
+    await cdp.send("Performance.getMetrics")
+  );
+
+  const snapshots = [];
+  let cumulativeActiveTime = initialActiveTime;
+  let lastTimestamp = startTime;
+
+  const timer = setInterval(async () => {
+    const { timestamp, activeTime } = processMetrics(
+      await cdp.send("Performance.getMetrics")
+    );
+    const frameDuration = timestamp - lastTimestamp;
+    let usage = (activeTime - cumulativeActiveTime) / frameDuration;
+    cumulativeActiveTime = activeTime;
+
+    if (usage > 1) usage = 1;
+
+    snapshots.push({
+      timestamp,
+      usage,
+    });
+
+    lastTimestamp = timestamp;
+  }, interval);
+
+  // Return a function to stop logging and get results
+  return async () => {
+    clearInterval(timer);
+    await cdp.send("Performance.disable");
+
+    return {
+      average: cumulativeActiveTime / (lastTimestamp - startTime),
+      snapshots,
+    };
+  };
+}
 function addToCSV(filename, values) {
   // Convert the values array to a CSV string
   const csvRow = values.join(',') + '\n';
@@ -17,6 +75,7 @@ function addToCSV(filename, values) {
   // Append the CSV row to the file
   fs.appendFileSync(filename, csvRow, 'utf8');
 }
+
 const trialId = "results/" + crypto.randomUUID().slice(0, 4);
 log_file = fs.createWriteStream(trialId + "/trial.log", {
   flags: "w",
@@ -39,20 +98,24 @@ function delay(time) {
 }
 
 async function traceRecord(traceFilePath, heapCSVpath,url) {
-  const browser = await puppeteer.launch({ headless: "new", devtools: true});
+  const browser = await puppeteer.launch({ headless: false, devtools: true});
   const page = await browser.newPage();
+  const pageSession = await page.target().createCDPSession();
   await page.goto(url);
   const folderName = traceFilePath.split("/")[0];
   if (!fs.existsSync(folderName)) {
     fs.mkdirSync(folderName);
   }
   await page.tracing.start({ path: traceFilePath, screenshots: true });
+  const stopLogging = await logMetrics(pageSession, 100);
   for (let i = 0; i < 20; i++) {
-    await delay(100);
+    await delay(200)
     console.log(i)
     await page.click("#add-elements");
   }
 
+  const results = await stopLogging();
+  console.log("Average CPU Usage:", results.average);
   await page.tracing.stop();
 
   const f = await page.$("#item-count");
