@@ -7,29 +7,29 @@ const { setInterval } = require("timers");
 // Function to process metrics and extract timestamp and activeTime
 function processMetrics(metrics) {
   const activeTime = metrics.metrics
-    .filter(m => m.name.includes("Duration"))
-    .map(m => m.value)
+    .filter((m) => m.name.includes("Duration"))
+    .map((m) => m.value)
     .reduce((a, b) => a + b);
 
   return {
-    timestamp: metrics.metrics.find(m => m.name === "Timestamp")?.value || 0,
+    timestamp: metrics.metrics.find((m) => m.name === "Timestamp")?.value || 0,
     activeTime,
   };
 }
 
 // Function to log CPU usage metrics at specified intervals
-async function logMetrics(cdp, interval) {
+async function logMetrics(cdp, interval, CPUCSVpath) {
   // Enable performance monitoring
   await cdp.send("Performance.enable", {
     timeDomain: "timeTicks",
   });
 
   // Get initial metrics
-  const { timestamp: startTime, activeTime: initialActiveTime } = processMetrics(
-    await cdp.send("Performance.getMetrics")
-  );
+  const { timestamp: startTime, activeTime: initialActiveTime } =
+    processMetrics(await cdp.send("Performance.getMetrics"));
 
   const snapshots = [];
+  const csvRows = [];
   let cumulativeActiveTime = initialActiveTime;
   let lastTimestamp = startTime;
 
@@ -37,6 +37,7 @@ async function logMetrics(cdp, interval) {
     const { timestamp, activeTime } = processMetrics(
       await cdp.send("Performance.getMetrics")
     );
+
     const frameDuration = timestamp - lastTimestamp;
     let usage = (activeTime - cumulativeActiveTime) / frameDuration;
     cumulativeActiveTime = activeTime;
@@ -49,6 +50,13 @@ async function logMetrics(cdp, interval) {
     });
 
     lastTimestamp = timestamp;
+    csvRows.push([
+      timestamp * 1000000,
+      cumulativeActiveTime,
+      lastTimestamp - startTime,
+      frameDuration,
+      usage,
+    ]);
   }, interval);
 
   // Return a function to stop logging and get results
@@ -56,24 +64,33 @@ async function logMetrics(cdp, interval) {
     clearInterval(timer);
     await cdp.send("Performance.disable");
 
+    csvRows.forEach((row) => {
+      addToCSV(
+        CPUCSVpath,
+        row,
+        "ts,cumulativeActiveTime, totalTime, frameDuration, usage\n"
+      );
+    });
+
     return {
       average: cumulativeActiveTime / (lastTimestamp - startTime),
       snapshots,
     };
   };
 }
-function addToCSV(filename, values) {
+
+function addToCSV(filename, values, headers) {
   // Convert the values array to a CSV string
-  const csvRow = values.join(',') + '\n';
+  const csvRow = values.join(",") + "\n";
   // Check if the file exists
   const fileExists = fs.existsSync(filename);
   if (!fileExists) {
     // If the file doesn't exist, create it and add a header if needed
-    console.log('Creating new file')
-    fs.writeFileSync(filename, 'ts,tts,heapSizeUsed\n', 'utf8');
+    console.log("Creating new file");
+    fs.writeFileSync(filename, headers, "utf8");
   }
   // Append the CSV row to the file
-  fs.appendFileSync(filename, csvRow, 'utf8');
+  fs.appendFileSync(filename, csvRow, "utf8");
 }
 
 const trialId = "results/" + crypto.randomUUID().slice(0, 4);
@@ -97,8 +114,8 @@ function delay(time) {
   });
 }
 
-async function traceRecord(traceFilePath, heapCSVpath,url) {
-  const browser = await puppeteer.launch({ headless: false, devtools: true});
+async function traceRecord(traceFilePath, heapCSVpath, CPUCSVpath, url) {
+  const browser = await puppeteer.launch({ headless: true, devtools: true });
   const page = await browser.newPage();
   const pageSession = await page.target().createCDPSession();
   await page.goto(url);
@@ -107,10 +124,10 @@ async function traceRecord(traceFilePath, heapCSVpath,url) {
     fs.mkdirSync(folderName);
   }
   await page.tracing.start({ path: traceFilePath, screenshots: true });
-  const stopLogging = await logMetrics(pageSession, 100);
+  const stopLogging = await logMetrics(pageSession, 32, CPUCSVpath);
   for (let i = 0; i < 20; i++) {
-    await delay(200)
-    console.log(i)
+    await delay(200);
+    console.log(i);
     await page.click("#add-elements");
   }
 
@@ -136,7 +153,11 @@ async function traceRecord(traceFilePath, heapCSVpath,url) {
   );
 
   heapUsed.forEach((event) => {
-    addToCSV(heapCSVpath, [event.ts, event.tts, event.args.data.jsHeapSizeUsed])
+    addToCSV(
+      heapCSVpath,
+      [event.ts, event.tts, event.args.data.jsHeapSizeUsed],
+      "ts,tts,heapSizeUsed\n"
+    );
   });
 
   // if (clickEvents.length === 0) {
@@ -152,7 +173,6 @@ async function traceRecord(traceFilePath, heapCSVpath,url) {
     }
   });
 
-  // console.log(times);
   return times;
 }
 
@@ -177,13 +197,13 @@ const buildUrlParams = (recording, listSize, testNum, increment) =>
         const onDur = await traceRecord(
           `${onParams}.json`,
           `${onParams}HEAP.csv`,
-          `http://localhost:3000?${onParams}`,
+          `${onParams}CPU.csv`,
+          `http://localhost:3000?${onParams}`
         );
         console.log(`http://localhost:3000?${onParams}`);
         times.push(onDur);
       }
       console.log("times:", times);
-      // console.log("avg:", times.reduce((a, b) => a + b, 0) / times.length);
     };
     // run 100 trials for each recording setting (on/off)
     await runTests("on");
