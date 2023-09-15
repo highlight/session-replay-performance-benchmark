@@ -125,7 +125,7 @@ async function traceRecord(traceFilePath, heapCSVpath, CPUCSVpath, url) {
   }
   await page.tracing.start({ path: traceFilePath, screenshots: true });
   const stopLogging = await logMetrics(pageSession, 32, CPUCSVpath);
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < 1000; i++) {
     await delay(200);
     console.log(i);
     await page.click("#add-elements");
@@ -180,7 +180,7 @@ const buildUrlParams = (recording, listSize, testNum, increment) =>
   `${trialId}/t${testNum}&replay=${recording}&listSize=${listSize}&increment=${increment}`;
 
 (async () => {
-  const increment = 100;
+  const increment = 1000;
   console.log("starting simulation with id:", trialId);
   for (let i = 0; i < 1; i++) {
     const runTests = async (recording) => {
@@ -195,7 +195,7 @@ const buildUrlParams = (recording, listSize, testNum, increment) =>
           onParams
         );
         const onDur = await traceRecord(
-          `${onParams}.json`,
+          `ex2${onParams}.json`,
           `${onParams}HEAP.csv`,
           `${onParams}CPU.csv`,
           `http://localhost:3000?${onParams}`
