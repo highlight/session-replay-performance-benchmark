@@ -114,7 +114,13 @@ function delay(time) {
   });
 }
 
-async function traceRecord(traceFilePath, heapCSVpath, CPUCSVpath, url) {
+async function traceRecord(
+  traceFilePath,
+  heapCSVpath,
+  CPUCSVpath,
+  timeCSVpath,
+  url
+) {
   const browser = await puppeteer.launch({ headless: true, devtools: true });
   const page = await browser.newPage();
   const pageSession = await page.target().createCDPSession();
@@ -170,6 +176,7 @@ async function traceRecord(traceFilePath, heapCSVpath, CPUCSVpath, url) {
   clickEvents.forEach((event) => {
     if (event.name === "EventDispatch") {
       times.push(event.dur);
+      addToCSV(timeCSVpath, [event.dur], "duration\n");
     }
   });
 
@@ -180,7 +187,7 @@ const buildUrlParams = (recording, listSize, testNum, increment) =>
   `${trialId}/t${testNum}&replay=${recording}&listSize=${listSize}&increment=${increment}`;
 
 (async () => {
-  const increment = 1000;
+  const increment = 100;
   console.log("starting simulation with id:", trialId);
   for (let i = 0; i < 1; i++) {
     const runTests = async (recording) => {
@@ -198,6 +205,7 @@ const buildUrlParams = (recording, listSize, testNum, increment) =>
           `ex2${onParams}.json`,
           `${onParams}HEAP.csv`,
           `${onParams}CPU.csv`,
+          `${onParams}TIMES.csv`,
           `http://localhost:3000?${onParams}`
         );
         console.log(`http://localhost:3000?${onParams}`);
