@@ -17,65 +17,32 @@ function processMetrics(metrics) {
   };
 }
 
+
 // Function to log CPU usage metrics at specified intervals
-async function logMetrics(cdp, interval, CPUCSVpath) {
-  // Enable performance monitoring
-  await cdp.send("Performance.enable", {
-    timeDomain: "timeTicks",
-  });
+async function logSingleMetrics(cdp, CPUCSVpath) {
+  const {timestamp, activeTime} = processMetrics(
+    await cdp.send("Performance.getMetrics")
+  );
 
-  // Get initial metrics
-  const { timestamp: startTime, activeTime: initialActiveTime } =
-    processMetrics(await cdp.send("Performance.getMetrics"));
-
-  const snapshots = [];
-  const csvRows = [];
-  let cumulativeActiveTime = initialActiveTime;
-  let lastTimestamp = startTime;
-
-  const timer = setInterval(async () => {
-    const { timestamp, activeTime } = processMetrics(
+  return async () => {
+    const { timestamp: finalTimestamp, activeTime: finalActiveTime } = processMetrics(
       await cdp.send("Performance.getMetrics")
     );
 
-    const frameDuration = timestamp - lastTimestamp;
-    let usage = (activeTime - cumulativeActiveTime) / frameDuration;
-    cumulativeActiveTime = activeTime;
+    const frameDuration = finalTimestamp - timestamp;
+    let usage = (finalActiveTime - activeTime) / frameDuration;
 
-    if (usage > 1) usage = 1;
-
-    snapshots.push({
-      timestamp,
-      usage,
-    });
-
-    lastTimestamp = timestamp;
-    csvRows.push([
-      timestamp * 1000000,
-      cumulativeActiveTime,
-      lastTimestamp - startTime,
-      frameDuration,
-      usage,
-    ]);
-  }, interval);
-
-  // Return a function to stop logging and get results
-  return async () => {
-    clearInterval(timer);
-    await cdp.send("Performance.disable");
-
-    csvRows.forEach((row) => {
-      addToCSV(
-        CPUCSVpath,
-        row,
-        "ts,cumulativeActiveTime, totalTime, frameDuration, usage\n"
-      );
-    });
-
-    return {
-      average: cumulativeActiveTime / (lastTimestamp - startTime),
-      snapshots,
-    };
+    addToCSV(
+      CPUCSVpath,
+      [
+        timestamp ,
+        finalActiveTime,
+        finalTimestamp ,
+        frameDuration,
+        usage,
+      ],
+      "ts,cumulativeActiveTime, totalTime, frameDuration, usage\n"
+    );
   };
 }
 
@@ -130,15 +97,17 @@ async function traceRecord(
     fs.mkdirSync(folderName);
   }
   await page.tracing.start({ path: traceFilePath, screenshots: true });
-  const stopLogging = await logMetrics(pageSession, 32, CPUCSVpath);
+  await pageSession.send("Performance.enable", {
+    timeDomain: "timeTicks",
+  });
   for (let i = 0; i < 1000; i++) {
     await delay(200);
     console.log(i);
+    const stopTrace = await logSingleMetrics(pageSession, CPUCSVpath);
     await page.click("#add-elements");
+    await stopTrace();
   }
 
-  const results = await stopLogging();
-  console.log("Average CPU Usage:", results.average);
   await page.tracing.stop();
 
   const f = await page.$("#item-count");
