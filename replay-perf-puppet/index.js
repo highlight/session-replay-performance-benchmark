@@ -2,46 +2,38 @@ const puppeteer = require("puppeteer");
 const crypto = require("crypto");
 const fs = require("fs");
 var util = require("util");
-const { setInterval } = require("timers");
 
 // Function to process metrics and extract timestamp and activeTime
 function processMetrics(metrics) {
   const activeTime = metrics.metrics
-    .filter((m) => m.name.includes("Duration"))
+    .filter((m) => m.name.includes("Duration") && !m.name.includes("Task"))
     .map((m) => m.value)
     .reduce((a, b) => a + b);
 
   return {
     timestamp: metrics.metrics.find((m) => m.name === "Timestamp")?.value || 0,
+    heapUsed:
+      metrics.metrics.find((m) => m.name === "JSHeapUsedSize")?.value || 0,
     activeTime,
   };
 }
 
-
 // Function to log CPU usage metrics at specified intervals
-async function logSingleMetrics(cdp, CPUCSVpath) {
-  const {timestamp, activeTime} = processMetrics(
+async function logSingleMetrics(cdp, metricsCSVpath, index) {
+  const { timestamp, activeTime, heapUsed } = processMetrics(
     await cdp.send("Performance.getMetrics")
   );
 
   return async () => {
-    const { timestamp: finalTimestamp, activeTime: finalActiveTime } = processMetrics(
-      await cdp.send("Performance.getMetrics")
-    );
+    const { timestamp: finalTimestamp, activeTime: finalActiveTime } =
+      processMetrics(await cdp.send("Performance.getMetrics"));
 
-    const frameDuration = finalTimestamp - timestamp;
-    let usage = (finalActiveTime - activeTime) / frameDuration;
+    let usage = (finalActiveTime - activeTime) / (finalTimestamp - timestamp);
 
     addToCSV(
-      CPUCSVpath,
-      [
-        timestamp ,
-        finalActiveTime,
-        finalTimestamp ,
-        frameDuration,
-        usage,
-      ],
-      "ts,cumulativeActiveTime, totalTime, frameDuration, usage\n"
+      metricsCSVpath,
+      [index, timestamp, usage, heapUsed],
+      "increment, ts, usage, heapUsed\n"
     );
   };
 }
@@ -81,13 +73,7 @@ function delay(time) {
   });
 }
 
-async function traceRecord(
-  traceFilePath,
-  heapCSVpath,
-  CPUCSVpath,
-  timeCSVpath,
-  url
-) {
+async function traceRecord(traceFilePath, CPUCSVpath, timeCSVpath, url) {
   const browser = await puppeteer.launch({ headless: true, devtools: true });
   const page = await browser.newPage();
   const pageSession = await page.target().createCDPSession();
@@ -100,10 +86,10 @@ async function traceRecord(
   await pageSession.send("Performance.enable", {
     timeDomain: "timeTicks",
   });
-  for (let i = 0; i < 1000; i++) {
-    await delay(200);
+  for (let i = 0; i < 50; i++) {
+    await delay(100);
     console.log(i);
-    const stopTrace = await logSingleMetrics(pageSession, CPUCSVpath);
+    const stopTrace = await logSingleMetrics(pageSession, CPUCSVpath, i);
     await page.click("#add-elements");
     await stopTrace();
   }
@@ -123,17 +109,17 @@ async function traceRecord(
     (event) => event?.args?.data?.type === "click"
   );
 
-  const heapUsed = trace.traceEvents.filter(
-    (event) => event?.args?.data?.jsHeapSizeUsed
-  );
-
-  heapUsed.forEach((event) => {
-    addToCSV(
-      heapCSVpath,
-      [event.ts, event.tts, event.args.data.jsHeapSizeUsed],
-      "ts,tts,heapSizeUsed\n"
-    );
-  });
+  // const heapUsed = trace.traceEvents.filter(
+  //   (event) => event?.args?.data?.jsHeapSizeUsed
+  // );
+  //
+  // heapUsed.forEach((event) => {
+  //   addToCSV(
+  //     heapCSVpath,
+  //     [event.ts, event.tts, event.args.data.jsHeapSizeUsed],
+  //     "ts,tts,heapSizeUsed\n"
+  //   );
+  // });
 
   // if (clickEvents.length === 0) {
   //   throw ("no click events found in trace file:", traceFilePath);
@@ -171,9 +157,8 @@ const buildUrlParams = (recording, listSize, testNum, increment) =>
           onParams
         );
         const onDur = await traceRecord(
-          `ex2${onParams}.json`,
-          `${onParams}HEAP.csv`,
-          `${onParams}CPU.csv`,
+          `${onParams}ex2.json`,
+          `${onParams}METRICS.csv`,
           `${onParams}TIMES.csv`,
           `http://localhost:3000?${onParams}`
         );
